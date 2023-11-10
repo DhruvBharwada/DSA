@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+// Function to perform binary search in a sorted array
+int binarySearch(int arr[], int low, int high, int key) {
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+
+        // Check if the key is present at the middle of the array
+        if (arr[mid] == key)
+            return mid;
+
+        // If the key is smaller, ignore the right half
+        else if (arr[mid] > key)
+            high = mid - 1;
+
+        // If the key is larger, ignore the left half
+        else
+            low = mid + 1;
+    }
+
+    // If the key is not present in the array
+    return -1;
+}
+
+// Example usage
+int main() {
+    int arr[] = {2, 3, 4, 10, 40};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    int key = 10;
+    int result = binarySearch(arr, 0, n - 1, key);
+
+    if (result != -1)
+        printf("Element %d found at index %d.\n", key, result);
+    else
+        printf("Element %d not found in the array.\n", key);
+
+    return 0;
+}
