@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for the linked list
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+// Structure for the queue
+struct Queue {
+    struct Node* front;
+    struct Node* rear;
+};
+
+// Function to initialize an empty queue
+void initializeQueue(struct Queue* queue) {
+    queue->front = queue->rear = NULL;
+}
+
+// Function to check if the queue is empty
+int isEmpty(struct Queue* queue) {
+    return queue->front == NULL;
+}
+
+// Function to enqueue (insert) an element at the rear of the queue
+void enqueue(struct Queue* queue, int data) {
+    // Create a new node
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    if (newNode == NULL) {
+        printf("Memory allocation error\n");
+        return;
+    }
+
+    newNode->data = data;
+    newNode->next = NULL;
+
+    // If the queue is empty, set both front and rear to the new node
+    if (isEmpty(queue)) {
+        queue->front = queue->rear = newNode;
+    } else {
+        // Otherwise, add the new node at the rear and update the rear pointer
+        queue->rear->next = newNode;
+        queue->rear = newNode;
+    }
+
+    printf("Enqueued: %d\n", data);
+}
+
+// Function to dequeue (remove) an element from the front of the queue
+int dequeue(struct Queue* queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty, cannot dequeue\n");
+        return -1; // Return an error value
+    }
+
+    // Remove the front node and update the front pointer
+    struct Node* temp = queue->front;
+    int data = temp->data;
+
+    queue->front = temp->next;
+
+    // If the queue becomes empty after dequeue, update the rear pointer
+    if (queue->front == NULL) {
+        queue->rear = NULL;
+    }
+
+    free(temp);
+    printf("Dequeued: %d\n", data);
+    return data;
+}
+
+// Function to print the elements in the queue
+void displayQueue(struct Queue* queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty\n");
+        return;
+    }
+
+    struct Node* current = queue->front;
+    printf("Queue: ");
+    while (current != NULL) {
+        printf("%d ", current->data);
+        current = current->next;
+    }
+    printf("\n");
+}
+
+// Example usage
+int main() {
+    struct Queue queue;
+    initializeQueue(&queue);
+
+    enqueue(&queue, 10);
+    enqueue(&queue, 20);
+    enqueue(&queue, 30);
+
+    displayQueue(&queue);
+
+    dequeue(&queue);
+    dequeue(&queue);
+
+    displayQueue(&queue);
+
+    return 0;
+}
