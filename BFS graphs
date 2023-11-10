@@ -1,0 +1,163 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure for a node in the adjacency list
+struct AdjListNode {
+    int dest;
+    struct AdjListNode* next;
+};
+
+// Structure for the adjacency list
+struct AdjList {
+    struct AdjListNode* head;
+};
+
+// Structure for the graph
+struct Graph {
+    int V; // Number of vertices
+    struct AdjList* array;
+};
+
+// Structure for a queue node used in BFS
+struct QueueNode {
+    int vertex;
+    struct QueueNode* next;
+};
+
+// Structure for the queue
+struct Queue {
+    struct QueueNode *front, *rear;
+};
+
+// Function to create a new adjacency list node
+struct AdjListNode* newAdjListNode(int dest) {
+    struct AdjListNode* newNode = (struct AdjListNode*)malloc(sizeof(struct AdjListNode));
+    newNode->dest = dest;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to create a graph with V vertices
+struct Graph* createGraph(int V) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->array = (struct AdjList*)malloc(V * sizeof(struct AdjList));
+
+    for (int i = 0; i < V; ++i)
+        graph->array[i].head = NULL;
+
+    return graph;
+}
+
+// Function to add an edge to an undirected graph
+void addEdge(struct Graph* graph, int src, int dest) {
+    struct AdjListNode* newNode = newAdjListNode(dest);
+    newNode->next = graph->array[src].head;
+    graph->array[src].head = newNode;
+
+    // Since the graph is undirected, add an edge from dest to src as well
+    newNode = newAdjListNode(src);
+    newNode->next = graph->array[dest].head;
+    graph->array[dest].head = newNode;
+}
+
+// Function to initialize a queue
+struct Queue* createQueue() {
+    struct Queue* queue = (struct Queue*)malloc(sizeof(struct Queue));
+    queue->front = queue->rear = NULL;
+    return queue;
+}
+
+// Function to check if the queue is empty
+int isEmpty(struct Queue* queue) {
+    return queue->front == NULL;
+}
+
+// Function to enqueue (insert) a vertex into the queue
+void enqueue(struct Queue* queue, int vertex) {
+    struct QueueNode* newNode = (struct QueueNode*)malloc(sizeof(struct QueueNode));
+    newNode->vertex = vertex;
+    newNode->next = NULL;
+
+    if (isEmpty(queue)) {
+        queue->front = queue->rear = newNode;
+    } else {
+        queue->rear->next = newNode;
+        queue->rear = newNode;
+    }
+}
+
+// Function to dequeue (remove) a vertex from the queue
+int dequeue(struct Queue* queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty, cannot dequeue\n");
+        return -1; // Return an error value
+    }
+
+    struct QueueNode* temp = queue->front;
+    int vertex = temp->vertex;
+
+    queue->front = temp->next;
+
+    free(temp);
+    return vertex;
+}
+
+// Function to perform BFS traversal starting from a given vertex
+void BFS(struct Graph* graph, int startVertex) {
+    int* visited = (int*)malloc(graph->V * sizeof(int));
+
+    for (int i = 0; i < graph->V; i++) {
+        visited[i] = 0; // Mark all vertices as not visited
+    }
+
+    struct Queue* queue = createQueue();
+    visited[startVertex] = 1; // Mark the starting vertex as visited
+    enqueue(queue, startVertex);
+
+    printf("BFS traversal starting from vertex %d: ", startVertex);
+
+    while (!isEmpty(queue)) {
+        int currentVertex = dequeue(queue);
+        printf("%d ", currentVertex);
+
+        // Traverse all the adjacent vertices
+        struct AdjListNode* currentNode = graph->array[currentVertex].head;
+        while (currentNode != NULL) {
+            int adjVertex = currentNode->dest;
+            if (!visited[adjVertex]) {
+                visited[adjVertex] = 1;
+                enqueue(queue, adjVertex);
+            }
+            currentNode = currentNode->next;
+        }
+    }
+
+    printf("\n");
+
+    free(visited);
+    free(queue);
+}
+
+// Example usage
+int main() {
+    // Create a graph with 4 vertices
+    struct Graph* graph = createGraph(4);
+
+    // Add edges
+    addEdge(graph, 0, 1);
+    addEdge(graph, 0, 2);
+    addEdge(graph, 1, 2);
+    addEdge(graph, 2, 0);
+    addEdge(graph, 2, 3);
+    addEdge(graph, 3, 3);
+
+    // Perform BFS traversal starting from vertex 2
+    BFS(graph, 2);
+
+    // Free allocated memory
+    free(graph->array);
+    free(graph);
+
+    return 0;
+}
