@@ -1,0 +1,92 @@
+#include <stdio.h>
+
+#define MAX_SIZE 5
+
+// Structure to represent the Static Queue
+struct StaticQueue {
+    int items[MAX_SIZE];
+    int front, rear;
+};
+
+// Function to initialize the Static Queue
+void initializeQueue(struct StaticQueue* queue) {
+    queue->front = -1;
+    queue->rear = -1;
+}
+
+// Function to check if the Static Queue is empty
+int isEmpty(struct StaticQueue* queue) {
+    return (queue->front == -1);
+}
+
+// Function to check if the Static Queue is full
+int isFull(struct StaticQueue* queue) {
+    return ((queue->rear + 1) % MAX_SIZE == queue->front);
+}
+
+// Function to enqueue an element into the Static Queue
+void enqueue(struct StaticQueue* queue, int value) {
+    if (isFull(queue)) {
+        printf("Queue is full. Cannot enqueue.\n");
+    } else {
+        if (isEmpty(queue)) {
+            queue->front = 0;
+        }
+        queue->rear = (queue->rear + 1) % MAX_SIZE;
+        queue->items[queue->rear] = value;
+        printf("%d enqueued to the queue.\n", value);
+    }
+}
+
+// Function to dequeue an element from the Static Queue
+void dequeue(struct StaticQueue* queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty. Cannot dequeue.\n");
+    } else {
+        printf("%d dequeued from the queue.\n", queue->items[queue->front]);
+        if (queue->front == queue->rear) {
+            // Queue becomes empty after dequeue
+            initializeQueue(queue);
+        } else {
+            queue->front = (queue->front + 1) % MAX_SIZE;
+        }
+    }
+}
+
+// Function to display the elements of the Static Queue
+void display(struct StaticQueue* queue) {
+    if (isEmpty(queue)) {
+        printf("Queue is empty.\n");
+    } else {
+        printf("Elements in the queue: ");
+        int i = queue->front;
+        do {
+            printf("%d ", queue->items[i]);
+            i = (i + 1) % MAX_SIZE;
+        } while (i != (queue->rear + 1) % MAX_SIZE);
+        printf("\n");
+    }
+}
+
+int main() {
+    struct StaticQueue queue;
+    initializeQueue(&queue);
+
+    enqueue(&queue, 1);
+    enqueue(&queue, 2);
+    enqueue(&queue, 3);
+    enqueue(&queue, 4);
+    enqueue(&queue, 5);
+
+    display(&queue);
+
+    dequeue(&queue);
+
+    display(&queue);
+
+    enqueue(&queue, 6);
+
+    display(&queue);
+
+    return 0;
+}
