@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define TABLE_SIZE 10
+
+// Structure for a hash table entry
+struct HashEntry {
+    int key;
+    int value;
+};
+
+// Structure for the hash table
+struct HashTable {
+    struct HashEntry* table[TABLE_SIZE];
+};
+
+// Function to initialize the hash table
+void initializeHashTable(struct HashTable* ht) {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        ht->table[i] = NULL;
+    }
+}
+
+// Function to compute the hash index using quadratic probing
+int hashFunction(int key, int attempt) {
+    return (key + attempt * attempt) % TABLE_SIZE;
+}
+
+// Function to insert a key-value pair into the hash table using quadratic probing
+void insert(struct HashTable* ht, int key, int value) {
+    int attempt = 0;
+    int index;
+
+    do {
+        index = hashFunction(key, attempt);
+
+        // If the slot is empty, insert the entry
+        if (ht->table[index] == NULL) {
+            struct HashEntry* newEntry = (struct HashEntry*)malloc(sizeof(struct HashEntry));
+            newEntry->key = key;
+            newEntry->value = value;
+            ht->table[index] = newEntry;
+
+            printf("Inserted key %d with value %d at index %d\n", key, value, index);
+            return;
+        }
+
+        // If the slot is not empty, try the next quadratic position
+        attempt++;
+    } while (attempt < TABLE_SIZE);
+
+    // Print an error message if the table is full
+    printf("Error: Hash table is full, unable to insert key %d with value %d\n", key, value);
+}
+
+// Function to search for a key in the hash table using quadratic probing
+int search(struct HashTable* ht, int key) {
+    int attempt = 0;
+    int index;
+
+    do {
+        index = hashFunction(key, attempt);
+
+        // If the slot is empty, the key is not present
+        if (ht->table[index] == NULL) {
+            return -1;
+        }
+
+        // If the key matches, return the index
+        if (ht->table[index]->key == key) {
+            return index;
+        }
+
+        // If the key doesn't match, try the next quadratic position
+        attempt++;
+    } while (attempt < TABLE_SIZE);
+
+    return -1; // Key not found
+}
+
+// Example usage
+int main() {
+    struct HashTable ht;
+    initializeHashTable(&ht);
+
+    insert(&ht, 5, 50);
+    insert(&ht, 15, 150);
+    insert(&ht, 25, 250);
+
+    int searchKey = 15;
+    int result = search(&ht, searchKey);
+
+    if (result != -1) {
+        printf("Key %d found at index %d\n", searchKey, result);
+    } else {
+        printf("Key %d not found in the hash table\n", searchKey);
+    }
+
+    return 0;
+}
