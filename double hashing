@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define TABLE_SIZE 10
+
+// Structure for a hash table entry
+struct HashEntry {
+    int key;
+    int value;
+};
+
+// Structure for the hash table
+struct HashTable {
+    struct HashEntry* table[TABLE_SIZE];
+};
+
+// Function to initialize the hash table
+void initializeHashTable(struct HashTable* ht) {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        ht->table[i] = NULL;
+    }
+}
+
+// Function to compute the primary hash index
+int primaryHashFunction(int key) {
+    return key % TABLE_SIZE;
+}
+
+// Function to compute the secondary hash index using double hashing
+int secondaryHashFunction(int key) {
+    // Using a prime number for the secondary hash ensures a full coverage of the array
+    return 7 - (key % 7);
+}
+
+// Function to insert a key-value pair into the hash table using double hashing
+void insert(struct HashTable* ht, int key, int value) {
+    int index = primaryHashFunction(key);
+
+    // If the slot is empty, insert the entry
+    if (ht->table[index] == NULL) {
+        struct HashEntry* newEntry = (struct HashEntry*)malloc(sizeof(struct HashEntry));
+        newEntry->key = key;
+        newEntry->value = value;
+        ht->table[index] = newEntry;
+
+        printf("Inserted key %d with value %d at index %d\n", key, value, index);
+        return;
+    }
+
+    // If the slot is not empty, use double hashing to find the next available slot
+    int step = secondaryHashFunction(key);
+    int attempt = 1;
+
+    while (ht->table[index] != NULL && attempt < TABLE_SIZE) {
+        index = (index + attempt * step) % TABLE_SIZE;
+        attempt++;
+    }
+
+    // If a slot is found, insert the entry
+    if (ht->table[index] == NULL) {
+        struct HashEntry* newEntry = (struct HashEntry*)malloc(sizeof(struct HashEntry));
+        newEntry->key = key;
+        newEntry->value = value;
+        ht->table[index] = newEntry;
+
+        printf("Inserted key %d with value %d at index %d\n", key, value, index);
+    } else {
+        // Print an error message if the table is full
+        printf("Error: Hash table is full, unable to insert key %d with value %d\n", key, value);
+    }
+}
+
+// Function to search for a key in the hash table using double hashing
+int search(struct HashTable* ht, int key) {
+    int index = primaryHashFunction(key);
+    int step = secondaryHashFunction(key);
+    int attempt = 0;
+
+    while (ht->table[index] != NULL && attempt < TABLE_SIZE) {
+        if (ht->table[index]->key == key) {
+            return index; // Key found
+        }
+
+        index = (index + attempt * step) % TABLE_SIZE;
+        attempt++;
+    }
+
+    return -1; // Key not found
+}
+
+// Example usage
+int main() {
+    struct HashTable ht;
+    initializeHashTable(&ht);
+
+    insert(&ht, 5, 50);
+    insert(&ht, 15, 150);
+    insert(&ht, 25, 250);
+
+    int searchKey = 15;
+    int result = search(&ht, searchKey);
+
+    if (result != -1) {
+        printf("Key %d found at index %d\n", searchKey, result);
+    } else {
+        printf("Key %d not found in the hash table\n", searchKey);
+    }
+
+    return 0;
+}
