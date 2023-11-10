@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for the linked list
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+// Structure for the stack
+struct Stack {
+    struct Node* top;
+};
+
+// Function to initialize an empty stack
+void initializeStack(struct Stack* stack) {
+    stack->top = NULL;
+}
+
+// Function to check if the stack is empty
+int isEmpty(struct Stack* stack) {
+    return stack->top == NULL;
+}
+
+// Function to push (insert) an element onto the stack
+void push(struct Stack* stack, int data) {
+    // Create a new node
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    if (newNode == NULL) {
+        printf("Memory allocation error\n");
+        return;
+    }
+
+    newNode->data = data;
+    newNode->next = stack->top;
+
+    // Update the top pointer to the new node
+    stack->top = newNode;
+
+    printf("Pushed: %d\n", data);
+}
+
+// Function to pop (remove) an element from the top of the stack
+int pop(struct Stack* stack) {
+    if (isEmpty(stack)) {
+        printf("Stack is empty, cannot pop\n");
+        return -1; // Return an error value
+    }
+
+    // Remove the top node and update the top pointer
+    struct Node* temp = stack->top;
+    int data = temp->data;
+
+    stack->top = temp->next;
+
+    free(temp);
+    printf("Popped: %d\n", data);
+    return data;
+}
+
+// Function to peek at the top element of the stack without removing it
+int peek(struct Stack* stack) {
+    if (isEmpty(stack)) {
+        printf("Stack is empty\n");
+        return -1; // Return an error value
+    }
+
+    return stack->top->data;
+}
+
+// Function to print the elements in the stack
+void displayStack(struct Stack* stack) {
+    if (isEmpty(stack)) {
+        printf("Stack is empty\n");
+        return;
+    }
+
+    struct Node* current = stack->top;
+    printf("Stack: ");
+    while (current != NULL) {
+        printf("%d ", current->data);
+        current = current->next;
+    }
+    printf("\n");
+}
+
+// Example usage
+int main() {
+    struct Stack stack;
+    initializeStack(&stack);
+
+    push(&stack, 10);
+    push(&stack, 20);
+    push(&stack, 30);
+
+    displayStack(&stack);
+
+    printf("Top element: %d\n", peek(&stack));
+
+    pop(&stack);
+    pop(&stack);
+
+    displayStack(&stack);
+
+    return 0;
+}
